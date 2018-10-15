@@ -1,7 +1,9 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-from config import config_dict
+from redis import StrictRedis
+
+from config import config_dict, REDIS_HOST, REDIS_PORT
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -18,6 +20,7 @@ logging.getLogger().addHandler(file_log_handler)
 # 实例化SQLAlchemy类对象
 db = SQLAlchemy()
 
+redis_store = StrictRedis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 def create_app(config_type):
     # 实例化Flask应用对象
@@ -27,7 +30,10 @@ def create_app(config_type):
     # 建立Flask对象与SQLAlchemy对象连接
     db.init_app(app)
 
+
     # 导入蓝图对象并注册
     from info.modules.new import news_blue
     app.register_blueprint(news_blue)
+    from info.modules.passport import passport_blue
+    app.register_blueprint(passport_blue)
     return app

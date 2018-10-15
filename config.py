@@ -13,7 +13,6 @@ class Config:
     # 配置状态保持相关信息
     SESSION_TYPE = 'redis'  # 缓存数据存储库类型设置为redis
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
-    REIDS_IMAGE_STORE = StrictRedis(host=REDIS_HOST, port=REDIS_PORT,decode_responses=True)
     SESSION_USE_SIGNER = True  # session签名
     PERMANENT_SESSION_LIFETIME = 86400  # 设置缓存信息有效期
 

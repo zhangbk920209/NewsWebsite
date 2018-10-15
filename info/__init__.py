@@ -2,7 +2,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 from redis import StrictRedis
-
+from flask_session import Session
+from flask_wtf import CSRFProtect, csrf
 from config import config_dict, REDIS_HOST, REDIS_PORT
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -22,6 +23,7 @@ db = SQLAlchemy()
 
 redis_store = StrictRedis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
+
 def create_app(config_type):
     # 实例化Flask应用对象
     app = Flask(__name__)
@@ -29,7 +31,16 @@ def create_app(config_type):
     app.config.from_object(config_dict[config_type])
     # 建立Flask对象与SQLAlchemy对象连接
     db.init_app(app)
-
+    # 实例化Session对象
+    Session(app)
+    # 实例化CSRFProtect对象
+    CSRFProtect(app)
+    # 定义钩子函数
+    @app.after_request
+    def after_request(response):
+        csrf_token = csrf.generate_csrf()
+        response.set_cookie('csrf_token', csrf_token)
+        return response
 
     # 导入蓝图对象并注册
     from info.modules.new import news_blue

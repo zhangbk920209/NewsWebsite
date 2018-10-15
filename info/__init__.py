@@ -26,4 +26,8 @@ def create_app(config_type):
     app.config.from_object(config_dict[config_type])
     # 建立Flask对象与SQLAlchemy对象连接
     db.init_app(app)
+
+    # 导入蓝图对象并注册
+    from info.modules.new import news_blue
+    app.register_blueprint(news_blue)
     return app

@@ -95,7 +95,7 @@ $(function () {
         $(this).find('a')[0].click()
     })
 
-    // TODO 登录表单提交
+    //  登录表单提交
     $(".login_form_con").submit(function (e) {
         e.preventDefault()
         var mobile = $(".login_form #mobile").val()
@@ -112,10 +112,30 @@ $(function () {
         }
 
         // 发起登录请求
+        var params = {
+            mobile:mobile,
+            password:password
+        }
+        $.ajax({
+            url:'login',
+            type:'post',
+            data:JSON.stringify(params),
+            contentType:'application/json',
+            headers:{
+                'X-CSRFToken':getCookie('csrf_token')
+            },
+            success:function (resp) {
+                if (resp.errno == 0){
+                    location.reload()
+                }else {
+                    alert(resp.errmsg)
+                }
+            }
+        })
     })
 
 
-    // TODO 注册按钮点击
+    //  注册按钮点击
     $(".register_form_con").submit(function (e) {
         // 阻止默认提交操作
         e.preventDefault()
@@ -146,7 +166,28 @@ $(function () {
         }
 
         // 发起注册请求
-
+        var params = {
+            mobile:mobile,
+            sms_code:smscode,
+            password:password
+        }
+        $.ajax({
+            url:'/register',
+            type:'post',
+            data:JSON.stringify(params),
+            contentType:'application/json',
+            headers:{
+                'X-CSRFToken':getCookie('csrf_token')
+            },
+            success:function (resp) {
+                if (resp.errno == 0){
+                    alert(resp.errmsg)
+                    location.reload()
+                } else{
+                    alert(resp.errmsg)
+                }
+            }
+        })
     })
 })
 
@@ -197,12 +238,15 @@ function sendSMSCode() {
             if (resp.errno == 0) {
                 var num = 60
                 var cTime = setInterval(function () {
-                    $('.get_code').html(num)
+
                     if (num < 1) {
-                        $('.get_code').addAttr('onclick'),
+                        clearInterval(cTime)
+                        $('.get_code').html('点击获取验证码')
+                        $('.get_code').attr('onclick', sendSMSCode()),
                         num = 60
                     } else {
                         num -= 1
+                        $('.get_code').html(num + '秒')
                     }
 
                 },1000)

@@ -35,6 +35,7 @@ def create_app(config_type):
     Session(app)
     # 实例化CSRFProtect对象
     CSRFProtect(app)
+
     # 定义钩子函数
     @app.after_request
     def after_request(response):
@@ -42,9 +43,14 @@ def create_app(config_type):
         response.set_cookie('csrf_token', csrf_token)
         return response
 
+    # 导入模板过滤器并添加
+    from info.utils.commons import rank_filter
+    app.add_template_filter(rank_filter, 'rank_filter')
+
     # 导入蓝图对象并注册
     from info.modules.new import news_blue
     app.register_blueprint(news_blue)
     from info.modules.passport import passport_blue
     app.register_blueprint(passport_blue)
+
     return app

@@ -1,5 +1,8 @@
 import random, re
+
+from datetime import datetime
 from flask import request, jsonify, current_app, make_response
+from flask import session
 
 from info import constants, db
 from info import redis_store
@@ -111,14 +114,52 @@ def register():
         current_app.logger.error(e)
         db.session.rollback()
         return jsonify(errno=RET.DBERR, errmsg='数据存储异常')
-    else:
-        return jsonify(errno=RET.OK, errmsg='用户注册成功,点击登陆。')
+    session['user_id'] = user.id
+    session['mobile'] = mobile
+    session['nick_name'] = mobile
+    return jsonify(errno=RET.OK, errmsg='用户注册成功')
 
 
 @passport_blue.route('/login', methods=['POST'])
 def login():
     # 获取参数
+    mobile = request.json.get('mobile')
+    password = request.json.get('password')
     # 检查参数
+    if not all([mobile, password]):
+        return jsonify(errno=RET.PARAMERR,errmsg='参数缺失')
+    # 手机号格式
+    if not re.match(r'1[3456789]\d{9}$', mobile):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数格式错误')
+    try:
+        user = User.query.filter(User.mobile == mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg='数据异常')
+    # 检查账号密码
+    if user is None or not user.check_password(password):
+        return jsonify(errno=RET.NODATA,errmsg='用户名或密码错误')
+    # 记录用户登陆时间
+    user.last_login = datetime.now()
+    # 提交数据
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR, errmsg='数据存储异常')
     # 业务处理
-    # 返回结果
-    pass
+    session['mobile'] = mobile
+    session['user_id'] = user.id
+    session['nick_name'] = user.nick_name
+    return jsonify(errno=RET.OK,errmsg='OK')
+
+
+# 无请求数据 接收GET方法
+@passport_blue.route('/logout')
+def logout():
+    session.pop('is_admin', None)
+    session.pop('nick_name', None)
+    session.pop('user_id', None)
+    session.pop('mobile', None)
+    return jsonify(errno=RET.OK,errmsg='退出成功')

@@ -5,6 +5,8 @@ var data_querying = true;   // 是否正在向后台获取数据
 
 
 $(function () {
+    // 更新首页最新分类的新闻
+    updateNewsData()
     // 首页分类切换
     $('.menu li').click(function () {
         var clickCid = $(this).attr('data-cid')
@@ -40,11 +42,55 @@ $(function () {
         var nowScroll = $(document).scrollTop();
 
         if ((canScrollHeight - nowScroll) < 100) {
-            // TODO 判断页数，去更新新闻数据
+            //  判断页数，去更新新闻数据
+            if (!data_querying) {
+                data_querying = true
+                if (cur_page < total_page) {
+                    cur_page += 1
+                    updateNewsData()
+                }
+            }
         }
     })
 })
 
 function updateNewsData() {
-    // TODO 更新新闻数据
+    //  更新新闻数据
+    var params = {
+        cid: currentCid,
+        page: cur_page,
+    }
+    $.ajax({
+        url: '/news_list',
+        type: 'post',
+        data: JSON.stringify(params),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRFToken': getCookie('csrf_token')
+        },
+        success: function (resp) {
+            data_querying = false
+            if (resp.errno == 0) {
+                total_page = resp.data1.total_page
+                if (cur_page == 1) {
+                    $('.list_con').html("")
+                }
+                for (var i = 0; i <= resp.data1.news_list.length; i++) {
+                    var news = resp.data1.news_list[i]
+                    var content = '<li>'
+                    content += '<a href="/' + news.id + '" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>'
+                    content += '<a href="/' + news.id + '" class="news_title fl">' + news.title + '</a>'
+                    content += '<a href="/' + news.id + '" class="news_detail fl">' + news.digest + '</a>'
+                    content += '<div class="author_info fl">'
+                    content += '<div class="source fl">来源：' + news.source + '</div>'
+                    content += '<div class="time fl">' + news.create_time + '</div>'
+                    content += '</div>'
+                    content += '</li>'
+                    $(".list_con").append(content)
+                }
+            } else {
+                alert(resp.errmsg)
+            }
+        }
+    })
 }

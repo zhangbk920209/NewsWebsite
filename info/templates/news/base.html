@@ -22,6 +22,18 @@
 
                 {% endblock %}
             </ul>
+            {% if data.user %}
+                <div class="user_login fr">
+                    <img src="{% if data.user.avatar_url %}{{ data.user.avatar_url }}{% else %}../../static/news/images/person01.png{% endif %}" class="lgin_pic">
+                    <a href="#">{{ data.user.nick_name }}</a>
+                    <a href="javascript:;" onclick="logout()">退出</a>
+                </div>
+            {% else %}
+                <div class="user_btns fr">
+                <a href="javascript:;" class="login_btn">登录</a> / <a href="javascript:;" class="register_btn">注册</a>
+                </div>
+            {% endif %}
+
         </div>
     </div>
 

@@ -1,5 +1,5 @@
-from flask import Blueprint, app
+from flask import Blueprint
 
-news_blue = Blueprint(app,__name__)
+news_blue = Blueprint('news_blue',__name__)
 
 from . import views

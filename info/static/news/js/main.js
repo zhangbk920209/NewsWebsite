@@ -185,6 +185,7 @@ $(function () {
                     location.reload()
                 } else{
                     alert(resp.errmsg)
+                    generateImageCode()
                 }
             }
         })
@@ -203,7 +204,7 @@ function generateImageCode() {
 // 发送短信验证码
 function sendSMSCode() {
     // 校验参数，保证输入框有数据填写
-    $(".get_code").removeAttr("onclick");
+
     var mobile = $("#register_mobile").val();
     if (!mobile) {
         $("#register-mobile-err").html("请填写正确的手机号！");
@@ -236,6 +237,7 @@ function sendSMSCode() {
         },
         success: function (resp) {
             if (resp.errno == 0) {
+                $(".get_code").removeAttr("onclick");
                 var num = 60
                 var cTime = setInterval(function () {
 
@@ -252,6 +254,7 @@ function sendSMSCode() {
                 },1000)
             } else {
                 alert(resp.errmsg)
+                generateImageCode()
             }
         }
     })

@@ -58,8 +58,7 @@ def news_list():
     if cid > 1:
         filters.append(News.category_id == cid)
     try:
-        paginate = News.query.filter(*filters).order_by(News.clicks).paginate(page, constants.HOME_PAGE_MAX_NEWS,
-                                                                                False)
+        paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, constants.HOME_PAGE_MAX_NEWS,False)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='数据查询异常')

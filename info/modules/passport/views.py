@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import request, jsonify, current_app, make_response
 from flask import session
 
+from config import Config
 from info import constants, db
 from info import redis_store
 from info.libs.yuntongxun.sms import CCP
@@ -31,6 +32,8 @@ def image_code():
         return jsonify(errno=RET.DBERR, errmsg='图片验证码获取失败')
     # 返回结果
     response = make_response(image)
+    # 设置响应类型为application/jpg
+    response.headers['Content-Type'] = 'image/jpg'
     return response
 
 
@@ -40,7 +43,6 @@ def sms_code():
     mobile = request.json.get('mobile')
     image_code = request.json.get('image_code')
     image_code_id = request.json.get('image_code_id')
-    print(image_code)
     # 检查参数
     if not all([image_code, mobile]):
         return jsonify(errno=RET.PARAMERR, errmsg='参数缺失')
@@ -55,28 +57,46 @@ def sms_code():
         redis_store.delete('Imagecode_' + image_code_id)
     except Exception as e:
         current_app.logger.error(e)
-    print(text, image_code)
+        return jsonify(errno=RET.DBERR, errmsg='获取数据失败')
+    # 判断获取结果
+    if not text:
+        return jsonify(errno=RET.NODATA, errmsg='图片验证码已过期')
+    # 判断图片验证码输入是否正确而
     if image_code.lower() != text.lower():
         return jsonify(errno=RET.PARAMERR, errmsg='图片验证码错误')
+    # 删除图片验证码
     try:
-        mobile_list = User.query.filter(User.mobile)
+        redis_store.delete('Imagecode_' + image_code_id)
+    except Exception as e:
+        current_app.logger.error(e)
+    # 判断手机是否注册
+    try:
+        user = User.query.filter(User.mobile == mobile).first()
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='数据异常')
-    if mobile in mobile_list:
+    if user:
         return jsonify(errno=RET.DATAEXIST, errmsg='手机号已注册')
     # 调用第三方工具发送短信
     sms_data = "%06d" % random.randint(1, 999999)
     print(sms_data)
-    ccp = CCP()
-    ccp.send_template_sms(mobile, [sms_data, constants.SMS_CODE_REDIS_EXPIRES / 60], 1)
     # 存储验证码信息
     try:
         redis_store.setex('smscode_' + mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_data)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='数据异常')
-    return jsonify(errno=RET.OK, errmsg='短信验证码已发送')
+    # 调用云通讯发送短信
+    try:
+        ccp = CCP()
+        result = ccp.send_template_sms(mobile, [sms_data, constants.SMS_CODE_REDIS_EXPIRES / 60], 1)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.THIRDERR, errmsg='短信发送异常')
+    if result == 0:
+        return jsonify(errno=RET.OK, errmsg='短信验证码已发送')
+    else:
+        return jsonify(errno=RET.THIRDERR,errmsg='短信发送失败')
 
 
 @passport_blue.route('/register', methods=['POST'])
@@ -117,6 +137,7 @@ def register():
     session['user_id'] = user.id
     session['mobile'] = mobile
     session['nick_name'] = mobile
+
     return jsonify(errno=RET.OK, errmsg='用户注册成功')
 
 
@@ -127,7 +148,7 @@ def login():
     password = request.json.get('password')
     # 检查参数
     if not all([mobile, password]):
-        return jsonify(errno=RET.PARAMERR,errmsg='参数缺失')
+        return jsonify(errno=RET.PARAMERR, errmsg='参数缺失')
     # 手机号格式
     if not re.match(r'1[3456789]\d{9}$', mobile):
         return jsonify(errno=RET.PARAMERR, errmsg='参数格式错误')
@@ -135,10 +156,10 @@ def login():
         user = User.query.filter(User.mobile == mobile).first()
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify(errno=RET.DBERR,errmsg='数据异常')
+        return jsonify(errno=RET.DBERR, errmsg='数据异常')
     # 检查账号密码
     if user is None or not user.check_password(password):
-        return jsonify(errno=RET.NODATA,errmsg='用户名或密码错误')
+        return jsonify(errno=RET.NODATA, errmsg='用户名或密码错误')
     # 记录用户登陆时间
     user.last_login = datetime.now()
     # 提交数据
@@ -152,7 +173,7 @@ def login():
     session['mobile'] = mobile
     session['user_id'] = user.id
     session['nick_name'] = user.nick_name
-    return jsonify(errno=RET.OK,errmsg='OK')
+    return jsonify(errno=RET.OK, errmsg='OK')
 
 
 # 无请求数据 接收GET方法
@@ -162,4 +183,4 @@ def logout():
     session.pop('nick_name', None)
     session.pop('user_id', None)
     session.pop('mobile', None)
-    return jsonify(errno=RET.OK,errmsg='退出成功')
+    return jsonify(errno=RET.OK, errmsg='退出成功')

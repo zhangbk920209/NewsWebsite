@@ -13,12 +13,59 @@ $(function(){
 
     // 收藏
     $(".collection").click(function () {
-        // $(this).attr('style','display:')
+        var news_id = $('.collection').attr('news_id')
+        var action = 'collect'
+        var params = {
+            news_id:news_id,
+            action:action
+        }
+        $.ajax({
+            url:'/news_collection',
+            type:'post',
+            data:JSON.stringify(params),
+            contentType:'application/json',
+            headers:{
+                'X-CSRFToken':getCookie('csrf_token')
+            },
+            success:function (resp) {
+                if(resp.errno == 0){
+                    $('.collection').hide()
+                    $('.collected').show()
+                }else if (resp.errno == 4101){
+                    alert('请先登陆')
+                    $('.login_form_con').show();
+                }else {
+                    alert('收藏失败')
+                }
+            }
+        })
     })
 
     // 取消收藏
     $(".collected").click(function () {
-
+        var news_id = $('.collected').attr('news_id')
+        var action = 'cancel_collect'
+        var params = {
+            news_id:news_id,
+            action:action
+        }
+        $.ajax({
+            url:'/news_collection',
+            type:'post',
+            data:JSON.stringify(params),
+            contentType:'application/json',
+            headers:{
+                'X-CSRFToken':getCookie('csrf_token')
+            },
+            success:function (resp) {
+                if(resp.errno == 0){
+                    $('.collection').show()
+                    $('.collected').hide()
+                }else {
+                    alert('取消收藏')
+                }
+            }
+        })
      
     })
 

@@ -2,8 +2,7 @@
 {% block title %}
     文章详情页
 {% endblock %}
-{% block jsBlock %}
-    index.js
+{% block jsBlock %}detail.js
 {% endblock %}
 {% block contentBlock %}
         <div class="detail_con fl">
@@ -18,11 +17,8 @@
             </p>
             {{ data.news_detail.content | safe }}
 
-        {% if data.is_collected %}
-            <a href="javascript:;" class="collected block-center" style="display: none"><span class="out">已收藏</span><span class="over">取消收藏</span></a>
-        {% else %}
-            <a href="javascript:;" class="collection block-center">收藏</a>
-        {% endif %}
+            <a href="javascript:;" news_id='{{ data.news_detail.id }}' class="collected block-center" style="display: {% if data.is_collected %} block {% else %} none {% endif %}"><span class="out">已收藏</span><span class="over">取消收藏</span></a>
+            <a href="javascript:;" news_id='{{ data.news_detail.id }}'class="collection block-center"style="display: {% if data.is_collected %} none {% else %} block {% endif %}">收藏</a>
 
         {% if not data.user %}
         <div class="comment_form_logout">

@@ -13,8 +13,7 @@ $(function(){
 
     // 收藏
     $(".collection").click(function () {
-
-       
+        // $(this).attr('style','display:')
     })
 
     // 取消收藏

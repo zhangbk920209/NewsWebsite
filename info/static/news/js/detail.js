@@ -2,7 +2,9 @@ function getCookie(name) {
     var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
     return r ? r[1] : undefined;
 }
-
+function add_reply() {
+    $(this).parent().show()
+}
 
 $(function(){
 
@@ -10,7 +12,10 @@ $(function(){
     $('.comment_form_logout').click(function () {
         $('.login_form_con').show();
     })
-
+    // // 弹出回复框
+    // $('.comment_reply').click(function () {
+    //     $('.reply_form').show()
+    // })
     // 收藏
     $(".collection").click(function () {
         var news_id = $('.collection').attr('news_id')
@@ -72,6 +77,35 @@ $(function(){
         // 评论提交
     $(".comment_form").submit(function (e) {
         e.preventDefault();
+        var comment_content = $('.comment_input').val()
+        var news_id = $('.collection').attr('news_id')
+        var parent_id = $('.user_name2').attr('parent_id')
+        if(!comment_content){
+            alert('请输入评论')
+            return
+        }
+        var params = {
+            comment:comment_content,
+            news_id:news_id,
+            parent_id:parent_id
+        }
+        $.ajax({
+            url:'/comment',
+            type:'post',
+            data:JSON.stringify(params),
+            headers:{
+                'X-CSRFToken':getCookie('csrf_token')
+            },
+            contentType:'application/json',
+            success:function (resp) {
+                if(resp.errno == 0){
+                    location.reload()
+                }else {
+                    alert(resp.errmsg)
+                }
+            }
+
+        })
 
     })
 

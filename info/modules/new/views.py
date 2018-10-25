@@ -384,9 +384,9 @@ def followed_user():
     if not author:
         return jsonify(errno=RET.NODATA,errmsg='作者不存在')
     if action == ' followed':
-        user.followers.append(author)
+        user.followed.append(author)
     else:
-        user.followers.remove(author)
+        user.followed.remove(author)
     return jsonify(errno=RET.OK,errmsg='OK')
 
 

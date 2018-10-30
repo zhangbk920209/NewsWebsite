@@ -57,5 +57,7 @@ def create_app(config_type):
     app.register_blueprint(passport_blue)
     from info.modules.profile import profile_blue
     app.register_blueprint(profile_blue)
+    from info.modules.admin import admin_blue
+    app.register_blueprint(admin_blue)
 
     return app

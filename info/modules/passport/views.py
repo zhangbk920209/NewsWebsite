@@ -137,6 +137,7 @@ def register():
     session['user_id'] = user.id
     session['mobile'] = mobile
     session['nick_name'] = mobile
+    session['is_admin'] = user.is_admin
 
     return jsonify(errno=RET.OK, errmsg='用户注册成功')
 
@@ -173,6 +174,7 @@ def login():
     session['mobile'] = mobile
     session['user_id'] = user.id
     session['nick_name'] = user.nick_name
+    session['is_admin'] = user.is_admin
     return jsonify(errno=RET.OK, errmsg='OK')
 
 

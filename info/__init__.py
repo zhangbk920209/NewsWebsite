@@ -46,6 +46,9 @@ def create_app(config_type):
     # 导入模板过滤器并添加
     from info.utils.commons import rank_filter
     app.add_template_filter(rank_filter, 'rank_filter')
+    # 导入审核过滤器并添加
+    from info.utils.commons import status_filter
+    app.add_template_filter(status_filter, 'status_filter')
 
     # 导入蓝图对象并注册
     from info.modules.new import news_blue

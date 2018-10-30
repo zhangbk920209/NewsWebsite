@@ -49,6 +49,7 @@ def news_list():
     # 获取参数
     cid = request.json.get('cid')
     page = request.json.get('page')
+    print(type(cid))
     # 参数均含默认值 不需检查 进行数据类型转换
     try:
         cid = int(cid)
@@ -60,7 +61,7 @@ def news_list():
     if cid > 1:
         filters.append(News.category_id == cid)
     try:
-        paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page,constants.HOME_PAGE_MAX_NEWS, False)
+        paginate = News.query.filter(*filters, News.status == 0).order_by(News.create_time.desc()).paginate(page,constants.HOME_PAGE_MAX_NEWS, False)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='数据查询异常')

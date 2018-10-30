@@ -35,3 +35,13 @@ def rank_filter(index):
         return 'third'
     else:
         return ''
+
+
+# 审核样式过滤器
+def status_filter(statu):
+    if statu == '0':
+        return 'pass'
+    elif statu == '1':
+        return 'review'
+    else:
+        return 'nopass'

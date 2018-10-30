@@ -13,22 +13,9 @@
     <div class="news_list">
         <h3>新闻列表</h3>
         <ul class="article_list">
-            <li><a href="user_news_release.html">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><em class="pass">已通过</em><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><em class="pass">已通过</em><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><em class="review">审核中</em><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><em class="review">审核中</em><span>2018-1-17</span></li>
-            <li>
-                <a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a>
-                <em class="nopass">未通过</em>
-                <span>2018-1-17</span>
-                <b>未通过原因：因为写的太boring,因为写的太boring,因为写的太boring,因为写的太boring,</b>
-            </li>
-            <li>
-                <a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a>
-                <em class="nopass">未通过</em>
-                <span>2018-1-17</span>
-                <b>未通过原因：因为写的太煽情,因为写的太煽情,因为写的太煽情,因为写的太煽情,</b>
-            </li>
+            {% for new in data.news_list %}
+                <li><a href="{% if new.status == 0 %}/{{ new.id }}{% else %}javascript:{% endif %}">{{ new.title }}</a><em class="{{ new.status | status_filter }}">{% if new.status == 0 %}已通过{% elif new.status == 1 %}审核中{% else %}审核未通过{% endif %}</em><span>{{ new.create_time }}</span>{% if new.status == -1 %}<b>未通过原因：{{ new.reason }}</b>{% endif %}</li>
+            {% endfor %}
         </ul>
         <div id="pagination" class="page"></div>
         <script>
@@ -37,10 +24,10 @@
 
             $(function(){
                 $("#pagination").pagination({
-                    currentPage: 2,
-                    totalPage: 3,
+                    currentPage: {{ data.current_page }},
+                    totalPage: {{ data.total_page }},
                     callback: function(current) {
-                        alert('ok!');
+                        window.location.href = '/user_news_list?p=' + current
                     }
                 });
             });

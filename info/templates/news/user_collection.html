@@ -13,26 +13,20 @@
     <div class="my_collect">
         <h3>我的收藏</h3>
         <ul class="article_list">
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
+            {% for new in data.news_list %}
+                <li><a href="/{{ new.id }}" target="_parent">{{ new.title }}</a><span>{{ new.create_time }}</span></li>
+            {% endfor %}
         </ul>
-
-
 
         <div id="pagination" class="page"></div>
         <script>
             $(function() {
                 $("#pagination").pagination({
-                    currentPage: 2,
-                    totalPage: 3,
+                    currentPage: {{ data.current_page }},
+                    totalPage: {{ data.total_page }},
                     callback: function(current) {
-                        alert('ok!');
-                    }
-                });
+                        window.location.href = "/user_collection?p=" + current
+                }});
             });
         </script>
 

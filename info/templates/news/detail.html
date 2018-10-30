@@ -74,8 +74,8 @@
 
         {% if data.news_detail.author %}
             <div class="author_card">
-                <a href="#" class="author_pic"><img src="{% if data.news_detail.author.avator_url %}{{ data.news_detail.author.avator_url }}{% else %}../../static/news/images/user_pic.png{% endif %}" alt="author_pic"></a>
-                <a href="#" class="author_name">{{ data.news_detail.author.nick_name }}</a>
+                <a href="/other_info?id={{ data.news_detail.author.id }}" class="author_pic"><img src="{% if data.news_detail.author.avator_url %}{{ data.news_detail.author.avator_url }}{% else %}../../static/news/images/user_pic.png{% endif %}" alt="author_pic"></a>
+                <a href="/other_info?id={{ data.news_detail.author.id }}" class="author_name">{{ data.news_detail.author.nick_name }}</a>
                 <div class="author_resume">{{ data.news_detail.author.signature }}</div>
                 <div class="writings"><span>总篇数</span><b>{{ data.news_detail.author.news_count }}</b></div>
                 <div class="follows"><span>粉丝</span><b>{{ data.news_detail.author.follwers_count }}</b></div>
